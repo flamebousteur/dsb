@@ -1,0 +1,30 @@
+*{
+	font:message-box;
+}
+
+html{
+	background-color: #222;
+}
+
+#log{
+	color: white;
+}
+
+#cmd{
+	border-top: 1px solid #FFF3;
+	margin-top: 10px;
+	padding-top: 10px;
+}
+
+#cmd input{
+	background-color: #FFF0;
+	outline: none;
+	color: white;
+	border: none;
+	width: 90%;
+}
+
+#cmd #directory{
+	color: white;
+	margin-right: 5px;
+}
