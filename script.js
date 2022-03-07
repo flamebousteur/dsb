@@ -96,9 +96,14 @@ async function exec(commands){
 			}
 		} else if(servercommands.includes(cmd[0])){
 			let rep = await send(command[i])
-			JSON.parse(rep).result.forEach(element => {
-				log.add(element)
-			});
+			try{
+				JSON.parse(rep)
+				JSON.parse(rep).result.forEach(element => {
+					log.add(element)
+				});
+			} catch {
+				log.add("Error: response can't be parse")
+			}
 		} else {
 			log.add("warn: command not found")
 		}
