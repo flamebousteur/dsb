@@ -19,11 +19,11 @@ function execute($txt, &$result){
 		$db = new PDO(
 			'mysql:host=localhost;dbname=dsb;charset=utf8',
 			'root',
-			'your_password'
+			''
 		);
 	}catch (Exception $e){
 		$result["statu"] = 500;
-		$result["result"][$i] = "fatal error: SQL connection faild";
+		$result["result"][0] = "fatal error: SQL connection faild";
 		return false;
 	}
 	/*
@@ -59,55 +59,51 @@ function execute($txt, &$result){
 		if(isset($command[0])){
 			// chec if command is for a connection
 			if($command[0] == "co"){
-				if(isset($_COOKIE["User_token"]) && isset($_COOKIE["User"])){
-					$result["result"][$i] = 'warn: already connect to "'.$_COOKIE["User"].'"';
-				}else{
-					if(isset($command[1])){
-						if(isset($command[2])){
-							if(srtsafe($command[1])){
-								$recipesStatement = $db->prepare("SELECT password FROM users WHERE id='".$command[1]."'");
-								$recipesStatement->execute();
-								$tp = $recipesStatement->fetchAll();
-								if($tp != false){
-									if(isset($tp[0]["password"])){
-										if($command[2] === $tp[0]["password"]){
-											setcookie("User",$command[1]);
-											$token = rdstring(20);
-											$recipesStatement = $db->prepare("UPDATE users SET C_token = '".$token."' WHERE id = '".$command[1]."'");
-											$recipesStatement->execute();
-											$tp = $recipesStatement->fetchAll();
-											setcookie("User_token",$token);
-											$result["result"][$i] = "connection to ".$command[1]." succes";
-										}else{
-											$result["statu"] = 400;
-											$result["result"][$i] = "fatal error: unauthorized, authentification failed: the passworld is not valid";
-											break;
-										}
+				if(isset($command[1])){
+					if(isset($command[2])){
+						if(srtsafe($command[1])){
+							$recipesStatement = $db->prepare("SELECT password FROM users WHERE id='".$command[1]."'");
+							$recipesStatement->execute();
+							$tp = $recipesStatement->fetchAll();
+							if($tp != false){
+								if(isset($tp[0]["password"])){
+									if($command[2] === $tp[0]["password"]){
+										setcookie("User",$command[1]);
+										$token = rdstring(20);
+										$recipesStatement = $db->prepare("UPDATE users SET C_token = '".$token."' WHERE id = '".$command[1]."'");
+										$recipesStatement->execute();
+										$tp = $recipesStatement->fetchAll();
+										setcookie("User_token",$token);
+										$result["result"][$i] = "connection to '".$command[1]."' succes";
 									}else{
 										$result["statu"] = 400;
-										$result["result"][$i] = "fatal error: unauthorized, authentification failed: the user is not found";
+										$result["result"][$i] = "fatal error: unauthorized, authentification failed: the passworld is not valid";
 										break;
 									}
 								}else{
 									$result["statu"] = 400;
-									$result["result"][$i] = "fatal error: SQL request faild";
+									$result["result"][$i] = "fatal error: unauthorized, authentification failed: the user is not found";
 									break;
 								}
 							}else{
 								$result["statu"] = 400;
-								$result["result"][$i] = "fatal error: SQL request is not secure";
+								$result["result"][$i] = "fatal error: SQL request faild";
 								break;
 							}
 						}else{
 							$result["statu"] = 400;
-							$result["result"][$i] = "fatal error: unauthorized, authentification failed: the passworld is not defind";
+							$result["result"][$i] = "fatal error: SQL request is not secure";
 							break;
 						}
 					}else{
 						$result["statu"] = 400;
-						$result["result"][$i] = "fatal error: unauthorized, authentification failed: the user is not defind";
+						$result["result"][$i] = "fatal error: unauthorized, authentification failed: the passworld is not defind";
 						break;
 					}
+				}else{
+					$result["statu"] = 400;
+					$result["result"][$i] = "fatal error: unauthorized, authentification failed: the user is not defind";
+					break;
 				}
 			}else{
 				// chec if the user is connect
@@ -156,9 +152,10 @@ function execute($txt, &$result){
 														$recipesStatement = $db->prepare("SELECT id FROM users WHERE id='".$command[1]."';");
 														$recipesStatement->execute();
 														$tp = $recipesStatement->fetchAll();
-														if($tp != false){
+														if($tp !== false){
 															if(isset($tp[0]["id"])){
 																$result["result"][$i] = "fatal error: user alredy exist";
+																break;
 															} else {
 																$new_user_conf = array(
 																	"id" => $command[1],
@@ -167,12 +164,12 @@ function execute($txt, &$result){
 																);
 																if(isset($command[3])){
 																	if($command[3] == 'true'){
-																		$new_user_conf['super_user'] = true;
+																		$new_user_conf['super_user'] = "true";
 																	}elseif ($command[3] == 'false') {
-																		$new_user_conf['super_user'] = false;
+																		$new_user_conf['super_user'] = "false";
 																	}
 																} else {
-																	$new_user_conf['super_user'] = false;
+																	$new_user_conf['super_user'] = "false";
 																}
 																$recipesStatement = $db->prepare("INSERT INTO users (id,password,su) VALUES ('".$new_user_conf['id']."','".$new_user_conf['password']."',".$new_user_conf['super_user'].");");
 																$recipesStatement->execute();
@@ -180,30 +177,34 @@ function execute($txt, &$result){
 															}
 														} else {
 															$result["result"][$i] = "error: SQL request faild";
+															break;
 														}
 													} else {
 														$result["result"][$i] = "fatal error: SQL request is not secure";
+														break;
 													}
 												}else {
 													$result["result"][$i] = "fatal error: the name or the password is not defind";
+													break;
 												}
 											}else {
 												$result["result"][$i] = "fatal error: your need be a super user to use this command";
+												break;
 											}
 											break;
 										case 'duser':
 											if($sudo == true){
 												if (isset($command[1])) {
 													if (srtsafe($command[1])) {
-														if($command[1] == "root"){
+														if($command[1] != "root"){
 															$recipesStatement = $db->prepare("SELECT id FROM users WHERE id='".$command[1]."';");
 															$recipesStatement->execute();
 															$tp = $recipesStatement->fetchAll();
-															if($tp != false){
+															if($tp !== false){
 																if(isset($tp[0]["id"])){
 																	$recipesStatement = $db->prepare("DELETE FROM users WHERE id = '".$command[1]."';");
 																	$recipesStatement->execute();
-																	$result["result"][$i] = "user '".$command[1]."' delet";
+																	$result["result"][$i] = "user '".$command[1]."' deleted";
 																} else {
 																	$result["result"][$i] = "fatal error: user not defind";
 																}
