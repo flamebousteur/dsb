@@ -1,5 +1,7 @@
 *{
-	font:message-box;
+	font:Consolas;
+	white-space: pre-wrap;
+	word-wrap: anywhere;
 }
 
 html{

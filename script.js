@@ -1,5 +1,8 @@
 const log = {
 	add:function(msg) {
+		msg = msg.replaceAll(">","&gt;")
+		msg = msg.replaceAll("<","&lt;")
+		msg = msg.replaceAll("\n","</br>")
 		let a = document.createElement("div")
 		a.innerHTML = msg
 		document.getElementById("log").appendChild(a)
@@ -12,7 +15,20 @@ const log = {
 		}
 	}
 }
+/*creat an Array with the 1st object of a json
+{"a":1,"b":2} => ["a","b"]
+*/
+function findex(list) {
+	let result = [];
+	for (let[key] of Object.entries(list)) {
+		result.push(key);
+	}
+	return result;
+}
 
+/*php $_COOKIE
+change document.cookie in json
+*/
 function $_COOKIE(){
 	let result = {}
 	let c = document.cookie
@@ -25,6 +41,17 @@ function $_COOKIE(){
 		result[key] = obj[key]
 	})
 	return result
+}
+
+/*
+
+*/
+function comble(txt,lenght){
+	let result = [];
+	for (let i=0; i < lenght; i++){
+    txt[i] ? result.push(txt[i]) : result.push(" ")
+  }
+	return result.join("")
 }
 
 var historic = {
@@ -70,17 +97,19 @@ async function exec(commands){
 	let command = commands.split('\n')
 	for (let i = 0; i < command.length; i++) {
 		let cmd = command[i].split(' ')
-		let localcommands = [
-			"cls",
-			"reset",
-		]
-		let servercommands = [
-			"co",
-			"deco",
-			"cuser",
-			"duser"
-		]
-		if (localcommands.includes(cmd[0])) {
+		let localcommands = {
+			"cls":"clear log",
+			"reset":"clear all cookies and settings",
+			"help":"show the command"
+		}
+		let servercommands = {
+			"co":"connect to an user: <id> <password>",
+			"deco":"deconnect to the user",
+			"cuser":"!super_user, creat an user: <id> <password>",
+			"duser":"!super_user, delet an user: <id>",
+			"users":"show all the user"
+		}
+		if (localcommands[cmd[0]]) {
 			switch (cmd[0]) {
 				case "cls":
 					log.clear()
@@ -90,19 +119,31 @@ async function exec(commands){
 						document.cookie = 'user='+a+'; expires=Thu, 01 Jan 1970 00:00:00 UTC'
 					}
 					break;
+				case "help":
+					let lc = []
+					for (const key in localcommands) {
+						lc.push(comble(key,7).toUpperCase()+"  "+localcommands[key]);
+					}
+					let sc = []
+					for (const key in servercommands) {
+						sc.push(comble(key,7).toUpperCase()+"  "+servercommands[key]);
+					}
+					let rp = "local commands: \n"+lc.join("\n")+"\n\nserver commands: \n"+sc.join("\n")
+					log.add(rp)
+					break;
 				default:
 					log.add("warn: command not found")
 					break;
 			}
-		} else if(servercommands.includes(cmd[0])){
+		} else if (servercommands[cmd[0]]) {
 			let rep = await send(command[i])
-			try{
+			try {
 				JSON.parse(rep)
 				JSON.parse(rep).result.forEach(element => {
 					log.add(element)
 				});
 			} catch {
-				log.add("Error: response can't be parse")
+				log.add("error: response can't be parse")
 			}
 		} else {
 			log.add("warn: command not found")
@@ -160,5 +201,6 @@ window.onload = function(){
 	if (localStorage["log"]) {
 		historic.commands = JSON.parse(localStorage["log"])
 	}
-	log.add("dsb Bios [v A.0]")
+	document.body.style.fontFamily = "Consolas"
+	log.add("dsb [v A.0]")
 }

@@ -4,7 +4,7 @@ $db = new PDO(
 	'root',
 	'your_password'
 );
-$recipesStatement = $db->prepare("SELECT c_token FROM users WHERE id = 'root';");
+$recipesStatement = $db->prepare("SELECT id FROM users;");
 $recipesStatement->execute();
 $tp = $recipesStatement->fetchAll();
 print_r($tp);

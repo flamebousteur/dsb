@@ -1,5 +1,5 @@
 <?php
-$result = array("statu" => 200);
+$result = array();
 
 function srtsafe($srt){
 	$a = array("\\","/",":","*","?","<",">","|","\"","'","`");
@@ -15,14 +15,13 @@ function srtsafe($srt){
 
 function execute($txt, &$result){
 	$commands = explode("\n", $txt);
-	try{
+	try {
 		$db = new PDO(
 			'mysql:host=localhost;dbname=dsb;charset=utf8',
 			'root',
-			''
+			'your_password'
 		);
-	}catch (Exception $e){
-		$result["statu"] = 500;
+	} catch (Exception $e){
 		$result["result"][0] = "fatal error: SQL connection faild";
 		return false;
 	}
@@ -76,32 +75,26 @@ function execute($txt, &$result){
 										setcookie("User_token",$token);
 										$result["result"][$i] = "connection to '".$command[1]."' succes";
 									}else{
-										$result["statu"] = 400;
 										$result["result"][$i] = "fatal error: unauthorized, authentification failed: the passworld is not valid";
 										break;
 									}
 								}else{
-									$result["statu"] = 400;
 									$result["result"][$i] = "fatal error: unauthorized, authentification failed: the user is not found";
 									break;
 								}
 							}else{
-								$result["statu"] = 400;
 								$result["result"][$i] = "fatal error: SQL request faild";
 								break;
 							}
 						}else{
-							$result["statu"] = 400;
 							$result["result"][$i] = "fatal error: SQL request is not secure";
 							break;
 						}
 					}else{
-						$result["statu"] = 400;
 						$result["result"][$i] = "fatal error: unauthorized, authentification failed: the passworld is not defind";
 						break;
 					}
 				}else{
-					$result["statu"] = 400;
 					$result["result"][$i] = "fatal error: unauthorized, authentification failed: the user is not defind";
 					break;
 				}
@@ -141,11 +134,13 @@ function execute($txt, &$result){
 									// execute the command
 									switch($command[0]){
 										case "deco":
+											// deconnect the user
 											setcookie("User", "", time()-3600);
 											setcookie("User_token", "", time()-3600);
 											$result["result"][$i] = "deconnection succes";
 											break;
 										case "cuser":
+											//reat a user: cuser <id> <password>
 											if($sudo == true){
 												if (isset($command[1]) && isset($command[2])) {
 													if (srtsafe($command[1]) && srtsafe($command[2])) {
@@ -193,15 +188,16 @@ function execute($txt, &$result){
 											}
 											break;
 										case 'duser':
-											if($sudo == true){
+											//delet an user !!only for super user : duser <name>
+											if ($sudo == true){
 												if (isset($command[1])) {
 													if (srtsafe($command[1])) {
-														if($command[1] != "root"){
+														if ($command[1] != "root"){
 															$recipesStatement = $db->prepare("SELECT id FROM users WHERE id='".$command[1]."';");
 															$recipesStatement->execute();
 															$tp = $recipesStatement->fetchAll();
-															if($tp !== false){
-																if(isset($tp[0]["id"])){
+															if ($tp !== false){
+																if (isset($tp[0]["id"])){
 																	$recipesStatement = $db->prepare("DELETE FROM users WHERE id = '".$command[1]."';");
 																	$recipesStatement->execute();
 																	$result["result"][$i] = "user '".$command[1]."' deleted";
@@ -217,11 +213,26 @@ function execute($txt, &$result){
 													} else {
 														$result["result"][$i] = "fatal error: SQL request is not secure";
 													}
-												}else {
+												} else {
 													$result["result"][$i] = "fatal error: the name is not defind";
 												}
-											}else {
+											} else {
 												$result["result"][$i] = "fatal error: your need be a super user to use this command";
+											}
+											break;
+										case 'users':
+											//show all user
+											$recipesStatement = $db->prepare("SELECT id FROM users;");
+											$recipesStatement->execute();
+											$tp = $recipesStatement->fetchAll();
+											if($tp !== false){
+												for ($i1=0; $i1 < count($tp); $i1++) {
+													$tp1[$i] = $tp[$i]["id"];
+												}
+												$result["result"][$i] = "users :/".implode("/",$tp1)."";
+											} else {
+												$result["result"][$i] = "fatal error: SQL request faild";
+												break;
 											}
 											break;
 										default:
@@ -229,28 +240,23 @@ function execute($txt, &$result){
 											$result["result"][$i] = "warn: command not found";
 									}
 								}else{
-									$result["statu"] = 400;
 									$result["result"][$i] = "fatal error: unauthorized, authentification failed: the User_token is not valid";
 									break;
 								}
 							}else{
-								$result["statu"] = 400;
 								$result["result"][$i] = "fatal error: unauthorized, authentification failed: the user is not found";
 								break;
 							}
 						}else{
-							$result["statu"] = 400;
 							$result["result"][$i] = "fatal error: SQL request faild";
 							break;
 						}
 					}else{
-						$result["statu"] = 400;
 						$result["result"][$i] = "fatal error: SQL request is not secure";
 						break;
 					}
 				}else{
 					// show the error
-					$result["statu"] = 401;
 					$result["result"][$i] = "fatal error: unauthorized, authentification failed";
 					break;
 				}
@@ -271,6 +277,6 @@ if(isset($_GET["m"])){
 	// in case of test
 }else{
 	// basic html
-	echo '<!DOCTYPE html><link rel="stylesheet" href="./style.css"><script src="./script.js"></script>';
+	echo '<!DOCTYPE html><script src="./script.js"></script><link rel="stylesheet" href="./style.css">';
 }
 ?>
