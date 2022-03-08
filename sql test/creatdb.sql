@@ -5,10 +5,19 @@ CREATE TABLE `dsb`.`users` (
 	`su` BOOLEAN NOT NULL,
 	`C_token` TEXT
 )ENGINE=MyISAM;
-INSERT INTO users (id,password,su) VALUES ('root','root',true);
 
--- CREATE TABLE `dsb`.`files` (
---	`directory` TEXT NOT NULL,
---	`id` TEXT NOT NULL,
---	`more` TEXT
---) ENGINE=MyISAM;
+CREATE TABLE `dsb`.`files` (
+	`directory_id` TEXT NOT NULL,
+	`name` TEXT NOT NULL,
+	`compress` BOOLEAN NOT NULL,
+	`id` TEXT NOT NULL,
+	`more` TEXT
+)ENGINE=MyISAM;
+
+CREATE TABLE `dsb`.`folder` (
+	`name` TEXT NOT NULL,
+	`id` TEXT NOT NULL,
+	`more` TEXT
+)ENGINE=MyISAM;
+
+INSERT INTO users (id,password,su) VALUES ('root','root',true);
