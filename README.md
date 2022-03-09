@@ -1,3 +1,17 @@
+```
+local commands: 
+CLS      clear log
+RESET    clear all cookies and settings
+HELP     show the command
+
+server commands: 
+CO       connect to an user: <id> <password>
+DECO     deconnect to the user
+CUSER    !super_user, creat an user: <id> <password>
+DUSER    !super_user, delet an user: <id>
+USERS    show all the user
+```
+
 files:
 - create
 - rename

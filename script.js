@@ -152,6 +152,7 @@ async function exec(commands){
 }
 
 window.onload = function(){
+	var directory = window.location.hostname+":/>"
 	let a = document.createElement("input")
 	a.onkeydown = function(e){
 		switch (e.key) {
@@ -190,13 +191,13 @@ window.onload = function(){
 				break;
 			}
 	}
-	document.body.innerHTML = '<div id="log"></div><div id="cmd"><span id="directory">A:\\></span></div>'
+	document.body.innerHTML = '<div id="log"></div><div id="cmd"><span id="directory"></span></div>'
 	document.getElementById("cmd").appendChild(a)
-	document.body.onkeydown = function(){
-		a.focus()
-	}
-	window.onclick = function(){
-		a.focus()
+	document.getElementById("directory").innerHTML = directory
+	document.body.onkeydown = function(e){
+		if(e.key.length == 1){
+			a.focus()
+		}
 	}
 	if (localStorage["log"]) {
 		historic.commands = JSON.parse(localStorage["log"])
