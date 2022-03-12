@@ -75,7 +75,7 @@ function send(msg){
 	if(msg){
 		return new Promise(r => {
 			let xhr = new XMLHttpRequest()
-			xhr.open("POST","./?m=terminal",true)
+			xhr.open("POST",conf.server+"./?m=terminal",true)
 			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
 			xhr.onreadystatechange = function(){
 				if(xhr.readyState == 4){
@@ -93,6 +93,11 @@ function send(msg){
 	}
 }
 
+let conf = {
+	server:window.location.href,
+	ls:"/"
+}
+
 async function exec(commands){
 	let command = commands.split('\n')
 	for (let i = 0; i < command.length; i++) {
@@ -100,6 +105,7 @@ async function exec(commands){
 		let localcommands = {
 			"cls":"clear log",
 			"reset":"clear all cookies and settings",
+			"server":"connnect to a server: <server with path !don't set parameter or hash>",
 			"help":"show the command"
 		}
 		let servercommands = {
@@ -117,6 +123,42 @@ async function exec(commands){
 				case "reset":
 					for (let a in $_COOKIE()) {
 						document.cookie = 'user='+a+'; expires=Thu, 01 Jan 1970 00:00:00 UTC'
+					}
+					break;
+				case "server":
+					if(cmd[1]){
+						let rep = JSON.parse(await new Promise(r => {
+							let xhr = new XMLHttpRequest()
+							xhr.open("GET",cmd[1]+"/?m=info",true)
+							console.log(cmd[1])
+							xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+							xhr.onreadystatechange = function(){
+								if(xhr.readyState == 4){
+									if (xhr.status != 400) {
+										if(xhr.responseText){
+											r(xhr.responseText);
+										}else{
+											r(false)
+										}
+									} else {
+										r(false)
+									}
+								}
+							}
+							xhr.send()
+						}))
+						if(rep){
+							if (rep.server) {
+								conf.server = cmd[1]
+								log.add("server set")
+							} else {
+								log.add("server invalid")
+							}
+						} else {
+							log.add("server not find or invalid")
+						}
+					} else {
+						log.add("server not set")
 					}
 					break;
 				case "help":
@@ -148,11 +190,22 @@ async function exec(commands){
 		} else {
 			log.add("warn: command not found")
 		}
+
+		let sv = window.location.href.match(/:\/\/([^\/]*)\//g)
+		sv = sv[0].substr(3)
+		sv = sv.slice(0, -1)
+
+		if ($_COOKIE()["User"]) {
+			directory = $_COOKIE()["User"]+"@"+sv+":"+conf.ls
+		} else {
+			directory = sv+":"+conf.ls
+		}
+		document.getElementById("directory").innerHTML = directory+">"
+		document.querySelector("title").innerHTML = "dsb-"+directory
 	}
 }
 
 window.onload = function(){
-	var directory = window.location.hostname+":/>"
 	let a = document.createElement("input")
 	a.onkeydown = function(e){
 		switch (e.key) {
@@ -191,9 +244,21 @@ window.onload = function(){
 				break;
 			}
 	}
-	document.body.innerHTML = '<div id="log"></div><div id="cmd"><span id="directory"></span></div>'
+	document.body.innerHTML = '<title>dsb</title><div id="log"></div><div id="cmd"><span id="directory"></span></div>'
 	document.getElementById("cmd").appendChild(a)
-	document.getElementById("directory").innerHTML = directory
+
+	let sv = window.location.href.match(/:\/\/([^\/]*)\//g)
+	sv = sv[0].substr(3)
+	sv = sv.slice(0, -1)
+
+	if ($_COOKIE()["User"]) {
+		directory = $_COOKIE()["User"]+"@"+sv+":"+conf.ls
+	} else {
+		directory = sv+":"+conf.ls
+	}
+	document.getElementById("directory").innerHTML = directory+">"
+	document.querySelector("title").innerHTML = "dsb-"+directory
+
 	document.body.onkeydown = function(e){
 		if(e.key.length == 1){
 			a.focus()

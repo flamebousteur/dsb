@@ -16,6 +16,7 @@ html{
 	border-top: 1px solid #FFF3;
 	margin-top: 10px;
 	padding-top: 10px;
+	width: 100%;
 }
 
 #cmd input{

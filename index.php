@@ -295,7 +295,6 @@ function execute($txt, &$result){
 							break;
 						}
 					} else {
-						// show the error
 						$result["result"][$i] = "fatal error: unauthorized, authentification failed";
 						break;
 					}
@@ -312,9 +311,12 @@ if(isset($_GET["m"])){
 			execute($_POST["t"], $result);
 		}
 	}
+	if($_GET["m"] == "info"){
+		$result["server"] = true;
+		$result["sql"] = true;
+		$result["database"] = "mysql";
+	}
 	print_r(json_encode($result));
-}else if(isset($_GET["a"])){
-	// in case of test
 }else{
 	// basic html
 	echo '<!DOCTYPE html><script src="./script.js"></script><link rel="stylesheet" href="./style.css">';
