@@ -2,6 +2,7 @@
 local commands: 
 CLS      clear log
 RESET    clear all cookies and settings
+SERVER   connnect to a server: <server with path !don't set parameter or hash>
 HELP     show the command
 
 server commands: 
