@@ -95,26 +95,22 @@ function send(msg){
 
 let conf = {
 	server:window.location.href,
-	ls:"/"
+	ls:"/",
+	user:""
 }
+
+let localcommands = {
+	"cls":"clear log",
+	"reset":"clear all cookies and settings",
+	"server":"connnect to a server: <server with path !don't set parameter or hash>",
+	"help":"show the command"
+}
+let servercommands = {}
 
 async function exec(commands){
 	let command = commands.split('\n')
 	for (let i = 0; i < command.length; i++) {
 		let cmd = command[i].split(' ')
-		let localcommands = {
-			"cls":"clear log",
-			"reset":"clear all cookies and settings",
-			"server":"connnect to a server: <server with path !don't set parameter or hash>",
-			"help":"show the command"
-		}
-		let servercommands = {
-			"co":"connect to an user: <id> <password>",
-			"deco":"deconnect to the user",
-			"cuser":"!super_user, creat an user: <id> <password>",
-			"duser":"!super_user, delet an user: <id>",
-			"users":"show all the user"
-		}
 		if (localcommands[cmd[0]]) {
 			switch (cmd[0]) {
 				case "cls":
@@ -154,6 +150,10 @@ async function exec(commands){
 							} else {
 								log.add("server invalid")
 							}
+							if (rep.allowsCommands) {
+								servercommands = rep.allowsCommands
+								log.add("server commands are configure")
+							}
 						} else {
 							log.add("server not find or invalid")
 						}
@@ -180,23 +180,36 @@ async function exec(commands){
 		} else if (servercommands[cmd[0]]) {
 			let rep = await send(command[i])
 			try {
-				JSON.parse(rep)
-				JSON.parse(rep).result.forEach(element => {
+				rep = JSON.parse(rep)
+			} catch {
+				rep = false
+			}
+			if (rep) {
+				rep.result.forEach(element => {
 					log.add(element)
 				});
-			} catch {
+				if (rep.set){
+					if (rep.set.user) {
+						conf.user = rep.set.user
+					}
+				}
+			} else {
 				log.add("error: response can't be parse")
 			}
 		} else {
 			log.add("warn: command not found")
 		}
 
-		let sv = window.location.href.match(/:\/\/([^\/]*)\//g)
+		let sv = conf.server.match(/:\/\/([^\/]*)\//g)
 		sv = sv[0].substr(3)
 		sv = sv.slice(0, -1)
 
-		if ($_COOKIE()["User"]) {
-			directory = $_COOKIE()["User"]+"@"+sv+":"+conf.ls
+		if($_COOKIE()["user"]){
+			conf.user = $_COOKIE()["user"]
+		}
+
+		if (conf.user != "") {
+			directory = conf.user+"@"+sv+":"+conf.ls
 		} else {
 			directory = sv+":"+conf.ls
 		}
@@ -206,6 +219,7 @@ async function exec(commands){
 }
 
 window.onload = function(){
+	exec("server "+conf.server)
 	let a = document.createElement("input")
 	a.onkeydown = function(e){
 		switch (e.key) {
@@ -247,12 +261,16 @@ window.onload = function(){
 	document.body.innerHTML = '<title>dsb</title><div id="log"></div><div id="cmd"><span id="directory"></span></div>'
 	document.getElementById("cmd").appendChild(a)
 
-	let sv = window.location.href.match(/:\/\/([^\/]*)\//g)
+	let sv = conf.server.match(/:\/\/([^\/]*)\//g)
 	sv = sv[0].substr(3)
 	sv = sv.slice(0, -1)
 
-	if ($_COOKIE()["User"]) {
-		directory = $_COOKIE()["User"]+"@"+sv+":"+conf.ls
+	if($_COOKIE()["user"]){
+		conf.user = $_COOKIE()["user"]
+	}
+
+	if (conf.user != "") {
+		directory = conf.user+"@"+sv+":"+conf.ls
 	} else {
 		directory = sv+":"+conf.ls
 	}

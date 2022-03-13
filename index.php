@@ -1,5 +1,8 @@
 <?php
-$result = array();
+header("Access-Control-Allow-Origin: *");
+$result = array(
+	"set" => array(),
+);
 
 function srtsafe($srt){
 	$a = array("\\","/",":","*","?","<",">","|","\"","'","`");
@@ -107,6 +110,7 @@ function execute($txt, &$result){
 												setcookie("User_token",$token);
 											}
 											$result["result"][$i] = "connection to '".$command[1]."' succes";
+											$result["set"]["user"] = $command[1];
 										}else{
 											$result["result"][$i] = "fatal error: unauthorized, authentification failed: the passworld is not valid";
 											break;
@@ -315,6 +319,13 @@ if(isset($_GET["m"])){
 		$result["server"] = true;
 		$result["sql"] = true;
 		$result["database"] = "mysql";
+		$result["allowsCommands"] = array(
+			"co" => "connect to an user: <id> <password>",
+			"deco" => "deconnect to the user",
+			"cuser" => "!super_user, creat an user: <id> <password>",
+			"duser" => "!super_user, delet an user: <id>",
+			"users" => "show all the user"
+		);
 	}
 	print_r(json_encode($result));
 }else{
