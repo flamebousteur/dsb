@@ -118,7 +118,7 @@ async function exec(commands){
 					break;
 				case "reset":
 					for (let a in $_COOKIE()) {
-						document.cookie = 'user='+a+'; expires=Thu, 01 Jan 1970 00:00:00 UTC'
+						document.cookie = a+'=; expires=Thu, 01 Jan 1970 00:00:00 UTC'
 					}
 					break;
 				case "server":
@@ -162,14 +162,14 @@ async function exec(commands){
 					}
 					break;
 				case "help":
+					let maxl = 0
+					for (let key in localcommands) if(key.length>maxl) maxl=key.length
+					for (let key in servercommands) if(key.length>maxl) maxl=key.length
+					maxl += 2
 					let lc = []
-					for (const key in localcommands) {
-						lc.push(comble(key,7).toUpperCase()+"  "+localcommands[key]);
-					}
 					let sc = []
-					for (const key in servercommands) {
-						sc.push(comble(key,7).toUpperCase()+"  "+servercommands[key]);
-					}
+					for (const key in localcommands) lc.push(comble(key,maxl).toUpperCase()+""+localcommands[key])
+					for (const key in servercommands) sc.push(comble(key,maxl).toUpperCase()+""+servercommands[key]);
 					let rp = "local commands: \n"+lc.join("\n")+"\n\nserver commands: \n"+sc.join("\n")
 					log.add(rp)
 					break;
@@ -204,8 +204,8 @@ async function exec(commands){
 		sv = sv[0].substr(3)
 		sv = sv.slice(0, -1)
 
-		if($_COOKIE()["user"]){
-			conf.user = $_COOKIE()["user"]
+		if($_COOKIE()["User"]){
+			conf.user = $_COOKIE()["User"]
 		}
 
 		if (conf.user != "") {
@@ -264,9 +264,10 @@ window.onload = function(){
 	let sv = conf.server.match(/:\/\/([^\/]*)\//g)
 	sv = sv[0].substr(3)
 	sv = sv.slice(0, -1)
-
-	if($_COOKIE()["user"]){
-		conf.user = $_COOKIE()["user"]
+	
+	console.log($_COOKIE()["User"]);
+	if($_COOKIE()["User"]){
+		conf.user = $_COOKIE()["User"]
 	}
 
 	if (conf.user != "") {

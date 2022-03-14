@@ -1,8 +1,29 @@
 <?php
-header("Access-Control-Allow-Origin: *");
 $result = array(
 	"set" => array(),
 );
+
+$conf = json_decode(file_get_contents("dsbconf.json"),true);
+
+function parm($c,&$conf){
+	if (isset($conf[$c])) {
+		return $conf[$c];
+	} else {
+		return false;
+	}
+}
+
+if (parm("terminal.external.allow",$conf) == true) {
+	header("Access-Control-Allow-Origin: *");
+}
+
+function logadd($txt, $level){
+	if (isset($txt)) {
+		if (parm("log.level",$conf) >= $level) {
+			file_put_contents(date("Y_m_d").".log", date("Y:m:d")."".$txt,FILE_APPEND);
+		}
+	}
+}
 
 function srtsafe($srt){
 	$a = array("\\","/",":","*","?","<",">","|","\"","'","`");
@@ -16,13 +37,13 @@ function srtsafe($srt){
 	return true;
 }
 
-function execute($txt, &$result){
+function execute($txt, &$result, &$logfiled, &$conf){
 	$commands = explode("\n", $txt);
 	try {
 		$db = new PDO(
 			'mysql:host=localhost;dbname=dsb;charset=utf8',
 			'root',
-			'your_password'
+			''
 		);
 	} catch (Exception $e){
 		$result["result"][0] = "fatal error: SQL connection faild";
@@ -102,6 +123,9 @@ function execute($txt, &$result){
 											} else {
 												$User = $command[1];
 											}
+											if (parm("log.level",$conf) >= 1) {
+												file_put_contents($logfiled, $User." connect\n",FILE_APPEND);
+											}
 											$token = rdstring(20);
 											$recipesStatement = $db->prepare("UPDATE users SET C_token = '".$token."' WHERE id = '".$command[1]."'");
 											$recipesStatement->execute();
@@ -163,10 +187,7 @@ function execute($txt, &$result){
 										$token = rdstring(20);
 										$recipesStatement = $db->prepare("UPDATE users SET C_token = '".$token."' WHERE id = '".$User."'");
 										$recipesStatement->execute();
-										if ($connection_mode == 0) {
-											setcookie("User_token",$token);
-										}
-
+										setcookie("User_token",$token);
 										// chec if the user is a super_user
 										$recipesStatement = $db->prepare("SELECT su FROM users WHERE id = '".$User."';");
 										$recipesStatement->execute();
@@ -312,7 +333,7 @@ function execute($txt, &$result){
 if(isset($_GET["m"])){
 	if($_GET["m"] == "terminal"){
 		if(isset($_POST["t"])){
-			execute($_POST["t"], $result);
+			execute($_POST["t"], $result, $logfiled, $conf);
 		}
 	}
 	if($_GET["m"] == "info"){

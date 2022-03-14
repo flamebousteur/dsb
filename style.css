@@ -4,30 +4,42 @@
 	word-wrap: anywhere;
 }
 
-html{
-	background-color: #222;
+@media (prefers-color-scheme:dark){
+	html{
+		--color:#fff;
+		--color2:#FFF3;
+		background-color: #222;
+	}
+}
+@media (prefers-color-scheme:light){
+	html{
+		--color:#000;
+		--color2:#0003;
+		background-color: #fff;
+	}
 }
 
 #log{
-	color: white;
+	color: var(--color);
 }
 
 #cmd{
-	border-top: 1px solid #FFF3;
 	margin-top: 10px;
 	padding-top: 10px;
 	width: 100%;
+	display: grid;
+	grid-template-columns: auto 1fr;
+	border-top: 1px solid var(--color2);
 }
 
 #cmd input{
-	background-color: #FFF0;
 	outline: none;
-	color: white;
 	border: none;
-	width: 90%;
+	background-color: #FFF0;
+	color: var(--color);
 }
 
 #cmd #directory{
-	color: white;
 	margin-right: 5px;
+	color: var(--color);
 }
