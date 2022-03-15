@@ -20,7 +20,7 @@ if (parm("terminal.external.allow",$conf) == true) {
 function logadd($txt, $level){
 	if (isset($txt)) {
 		if (parm("log.level",$conf) >= $level) {
-			file_put_contents(date("Y_m_d").".log", date("Y:m:d")."".$txt,FILE_APPEND);
+			file_put_contents(date("Y_m_d").".log", date("[Y:m:d / H:i:s]: ")."".$txt,FILE_APPEND);
 		}
 	}
 }
@@ -43,7 +43,7 @@ function execute($txt, &$result, &$logfiled, &$conf){
 		$db = new PDO(
 			'mysql:host=localhost;dbname=dsb;charset=utf8',
 			'root',
-			''
+			'your_password'
 		);
 	} catch (Exception $e){
 		$result["result"][0] = "fatal error: SQL connection faild";
@@ -123,9 +123,7 @@ function execute($txt, &$result, &$logfiled, &$conf){
 											} else {
 												$User = $command[1];
 											}
-											if (parm("log.level",$conf) >= 1) {
-												file_put_contents($logfiled, $User." connect\n",FILE_APPEND);
-											}
+											logadd($User." connect\n", 1);
 											$token = rdstring(20);
 											$recipesStatement = $db->prepare("UPDATE users SET C_token = '".$token."' WHERE id = '".$command[1]."'");
 											$recipesStatement->execute();
