@@ -36,23 +36,24 @@ folder:
 
 #function (linux):
 ```
-cd <directory>          go to
-pwd                     where I am
-ls                      liste of the files in a directory
+cd <directory:string>                                       go to
+pwd                                                         where am I
+ls                                                          liste of the files in a directory
 
-cat <file> <content>    create | modify file
-gedit <file>            open
-rm <file>               remove
-cp <file> <new>         copy past
-mv <original> <new>     move | rename
+cat <file:string> <content:string>                          create | modify file
+gedit <file:string>                                         open
+rm <file:string>                                            remove
+cp <file:string> <new:string>                               copy past
+mv <original:string> <new:string>                           move | rename
 
-mkdir <directory>       create directory
-rmdir <directory>       remove directory
+mkdir <directory:string>                                    create directory
+rmdir <directory:string>                                    remove directory
 ```
 
 #function (user):
 ```
-co <name> <passworld>                   connect
-deco                                    deconnect
-cuser <name> <password> <super user>    creat user
+users                                                       users list
+co <name:string> <passworld:string>                         connect
+deco                                                        deconnect
+cuser <name:string> <password:string> <super user:boolean>  creat user
 ```
