@@ -40,6 +40,7 @@ cd <directory>          go to
 pwd                     where I am
 ls                      liste of the files in a directory
 
+cat <file> <content>    create | modify file
 gedit <file>            open
 rm <file>               remove
 cp <file> <new>         copy past
