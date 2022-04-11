@@ -8,15 +8,9 @@ CREATE TABLE `dsb`.`users` (
 
 CREATE TABLE `dsb`.`files` (
 	`directory_id` TEXT NOT NULL,
-	`name` TEXT NOT NULL,
 	`compress` BOOLEAN NOT NULL,
 	`id` TEXT NOT NULL,
-	`more` TEXT
-)ENGINE=MyISAM;
-
-CREATE TABLE `dsb`.`folder` (
-	`name` TEXT NOT NULL,
-	`id` TEXT NOT NULL,
+	`access` TEXT NOT NULL,
 	`more` TEXT
 )ENGINE=MyISAM;
 
