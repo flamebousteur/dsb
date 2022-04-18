@@ -247,6 +247,9 @@ function a(){
 	window.onload = function(){
 		exec("server "+conf.server)
 		let a = document.createElement("input")
+		window.onclick = function(e){
+			if(e.target.nodeName == "HTML") a.focus()
+		}
 		a.onkeydown = function(e){
 			switch (e.key) {
 				case "Enter":

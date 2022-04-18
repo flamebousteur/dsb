@@ -320,6 +320,9 @@ function execute($txt, $User, $Password, &$result, &$dsbconf){
 									$tp = $recipesStatement->fetchAll();
 								}
 								if ($content != "") {
+									if (!is_dir("./files")) {
+										mkdir("./files");
+									}
 									file_put_contents("./files/".$r['id'], "".$content);
 								}
 								$result["result"][$i] = "file '".$file."' modified";
@@ -355,8 +358,11 @@ function execute($txt, $User, $Password, &$result, &$dsbconf){
 
 								$fileUUID = randomstr()."".uniqid("",true);
 								$recipesStatement = $db->prepare("INSERT INTO files (directory_id,`compress`,id,access,more) VALUES (?, ? , ? , ? , ?);");
-								$recipesStatement->execute(array("".$file, $compress, "".$fileUUID, "".$access, "".$more));
+								$recipesStatement->execute(array($file, $compress, "".$fileUUID, "".$access, $more));
 								$tp = $recipesStatement->fetchAll();
+								if (!is_dir("./files")) {
+									mkdir("./files");
+								}
 								file_put_contents("./files/".$fileUUID, "".$content);
 								$result["result"][$i] = "file '".$file."' created";
 							}
@@ -373,8 +379,7 @@ function execute($txt, $User, $Password, &$result, &$dsbconf){
 							$file = get_file($command[1]);
 							if ($file != false) {
 								if (array_key_exists($User,$file["access"]) || $sudo == true) {
-//									file_get_contents("../files/".$file["id"])
-									$result["result"][$i] = file_get_contents("../files/".$file["id"]);
+									$result["result"][$i] = file_get_contents("./files/".$file["id"]);
 								} else {
 									$result["result"][$i] = "fatal error: unauthorized, you need an permission to access this file";
 								}
@@ -412,6 +417,7 @@ if (isset($_POST["preset"])) {
 
 
 if (isset($_GET["f"])) {
+	$connected = false;
 	if ($preset["user"] != "" && $preset["password"] != "") {
 		if (!str_contains($preset["user"], ",")) {
 			$recipesStatement = $db->prepare("SELECT password FROM users WHERE id = ?");
@@ -447,16 +453,18 @@ if (isset($_GET["f"])) {
 		$file = get_file($_GET["f"]);
 		if ($file != false) {
 			if (array_key_exists($User,$file["access"]) || $sudo == true) {
-				print_f(file_get_contents("../files/".$file["id"]));
+				print_r(file_get_contents("./files/".$file["id"]));
 			} else {
-//				http_response_code(403);
-				print_f("error: unauthorized, you need an permission to access this file");
+				http_response_code(401);
+				print_r("error: unauthorized, you need an permission to access this file");
 			}
 		} else {
-			print_f("error: the file is not find");
+			http_response_code(404);
+			print_r("error: the file is not find");
 		}
 	} else {
-		print_f("fatal error: unauthorized, authentification failed: you need be connected");
+		http_response_code(401);
+		print_r("fatal error: unauthorized, authentification failed: you need be connected");
 	}
 } else if(isset($_GET["m"])){
 	if ($serverStatu == "not configured") {
